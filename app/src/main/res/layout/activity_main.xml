@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/textViewTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="68dp"
+        android:text="Location"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/buttonGetLocation"
+        android:layout_width="91dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="52dp"
+        android:layout_marginTop="236dp"
+        android:onClick="getLocation2"
+        android:text="Get Location"
+        android:textSize="10sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textViewLabelLat"
+        android:layout_width="wrap_content"
+        android:layout_height="20dp"
+        android:layout_marginStart="52dp"
+        android:layout_marginTop="148dp"
+        android:text="Latitude"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textViewLabelLong"
+        android:layout_width="wrap_content"
+        android:layout_height="20dp"
+        android:layout_marginStart="52dp"
+        android:layout_marginTop="24dp"
+        android:text="Longitude"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewLabelLat" />
+
+    <TextView
+        android:id="@+id/textViewLat"
+        android:layout_width="130dp"
+        android:layout_height="20dp"
+        android:layout_marginStart="36dp"
+        android:layout_marginTop="148dp"
+        android:hint="0.0000000000"
+        app:layout_constraintStart_toEndOf="@+id/textViewLabelLat"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textViewLng"
+        android:layout_width="130dp"
+        android:layout_height="20dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="24dp"
+        android:hint="0.0000000000"
+        app:layout_constraintStart_toEndOf="@+id/textViewLabelLong"
+        app:layout_constraintTop_toBottomOf="@+id/textViewLat" />
+</androidx.constraintlayout.widget.ConstraintLayout>
