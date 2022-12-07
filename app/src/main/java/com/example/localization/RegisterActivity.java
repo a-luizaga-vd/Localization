@@ -2,6 +2,7 @@ package com.example.localization;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -56,8 +57,6 @@ public class RegisterActivity extends AppCompatActivity {
         }
         boolean resEmail = validateEmail();
         boolean resPass = validatePassword();
-
-
         boolean resComaprePasswords = password.getText().toString().equals(password2.getText().toString());
 
         if(!resComaprePasswords){
@@ -73,29 +72,6 @@ public class RegisterActivity extends AppCompatActivity {
             registerAccount(registerRequest);
         }
 
-
-        /*AccountService accountService = ApiClient.getRetrofit().create(AccountService.class);
-
-        Call<TodosResponse> registerResponseCall = accountService.listTodos();
-
-        registerResponseCall.enqueue(new Callback<TodosResponse>() {
-            @Override
-            public void onResponse(Call<TodosResponse> call, Response<TodosResponse> response) {
-                int statusCode = response.code();
-
-                TodosResponse todosResponse = response.body();
-            }
-
-            @Override
-            public void onFailure(Call<TodosResponse> call, Throwable t) {
-                System.out.println(t.getMessage());
-                String messagge = t.getLocalizedMessage();
-
-                Toast.makeText(RegisterActivity.this, messagge, Toast.LENGTH_LONG).show();
-            }
-        });*/
-
-
     }
 
     public void registerAccount(RegisterRequest registerRequest){
@@ -109,26 +85,33 @@ public class RegisterActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<RegisterResponse> call, Response<RegisterResponse> response) {
                 int statusCode = response.code();
-                ResponseBody myError;
-
-                //RegisterResponse registerResponse = response.body();
 
                 if (statusCode == 400) {
-                    Gson gson = new GsonBuilder().create();
-                    ErrorListClass mError;
                     try {
-                        mError= gson.fromJson(response.errorBody().string(),ErrorListClass.class);
-                        //Toast.makeText(RegisterActivity.this, mError.getDescription(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(RegisterActivity.this, response.errorBody().string(), Toast.LENGTH_LONG).show();
                     } catch (IOException e) {
-                        // handle failure to read error
+                        e.printStackTrace();
                     }
                 }else if(statusCode == 500){
-                    System.out.println("User repetido");
+                    try {
+                        Toast.makeText(RegisterActivity.this, response.errorBody().string(), Toast.LENGTH_LONG).show();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
                 else{
                     /// codigo 200
+
+                    // aca ya tengo el token dentro del objeto registerResponse
+                    Toast.makeText(RegisterActivity.this, "SUCCESFULL", Toast.LENGTH_SHORT).show();
                     RegisterResponse registerResponse = response.body();
-                    System.out.println("asdsa");
+
+                    Intent i = new Intent(RegisterActivity.this, HomeActivity.class);
+                    i.putExtra("token", registerResponse.getToken());
+                    i.putExtra("expire", registerResponse.getExpire());
+
+                    startActivity(i);
+
                 }
 
 
