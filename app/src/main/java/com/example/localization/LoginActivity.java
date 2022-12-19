@@ -22,6 +22,12 @@ import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
 
+    public static String myToken;
+
+    public static String getMyToken() {
+        return myToken;
+    }
+
     EditText username;
     EditText password;
 
@@ -48,7 +54,7 @@ public class LoginActivity extends AppCompatActivity {
             postLogin(loginRequest);
         }
         else{
-            Toast.makeText(LoginActivity.this, "Emptys Fields", Toast.LENGTH_SHORT).show();
+            Toast.makeText(LoginActivity.this, "Empty Fields", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -85,6 +91,8 @@ public class LoginActivity extends AppCompatActivity {
                     LoginResponse loginResponse = response.body();
 
                     Intent i = new Intent(LoginActivity.this, HomeActivity.class);
+
+                    myToken = loginResponse.getToken();
                     i.putExtra("token", loginResponse.getToken());
                     i.putExtra("expire", loginResponse.getExpire());
 

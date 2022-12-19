@@ -1,5 +1,8 @@
 package com.example.localization;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 
@@ -21,7 +24,8 @@ public class ApiClient {
 
         Retrofit retrofit = new Retrofit.Builder()
                 .addConverterFactory(GsonConverterFactory.create())
-                .baseUrl("http://10.0.2.2:5004/api/")
+                .baseUrl("http://35.239.225.98:443/api/")
+                //.baseUrl("http://10.0.2.2:5004/api/")
                 .client(okHttpClient)
                 .build();
 
