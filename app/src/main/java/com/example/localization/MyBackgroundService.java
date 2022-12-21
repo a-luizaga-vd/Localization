@@ -30,6 +30,8 @@ import androidx.core.content.ContextCompat;
 import com.example.localization.requests.LocationRequest;
 import com.example.localization.services.LocationService;
 
+import java.text.DecimalFormat;
+
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -92,8 +94,11 @@ public class MyBackgroundService extends Service implements LocationListener{
     public void onLocationChanged(@NonNull Location location) {
 
         System.out.println("NO PASAODASJDNASODNASLDNAS");
-        latitude = String.valueOf(location.getLatitude());
-        longitude = String.valueOf(location.getLongitude());
+        DecimalFormat df = new DecimalFormat("#.##");
+        latitude = String.valueOf(df.format(location.getLatitude()));
+        longitude = String.valueOf(df.format(location.getLongitude()));
+
+
 
         //Log.e("GPStracker", String.valueOf(location.getLatitude())+", "+String.valueOf(location.getLongitude()));
         Log.e("GPStracker", latitude+", "+longitude);
@@ -109,7 +114,8 @@ public class MyBackgroundService extends Service implements LocationListener{
 
         LocationService locationService = ApiClient.getRetrofit().create(LocationService.class);
 
-        String bearerToken = "Bearer "+LoginActivity.getMyToken();
+        //String bearerToken = "Bearer "+LoginActivity.getMyToken();
+        String bearerToken = "Bearer "+HomeActivity.myToken;
 
         Call<ResponseBody> stringResponseCall = locationService.updateLocation(locationRequest, bearerToken);
 

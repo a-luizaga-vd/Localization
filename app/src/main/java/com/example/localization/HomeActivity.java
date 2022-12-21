@@ -8,6 +8,8 @@ import android.view.View;
 
 public class HomeActivity extends AppCompatActivity {
 
+    public static String myToken;
+
     String token;
 
     @Override
@@ -17,6 +19,7 @@ public class HomeActivity extends AppCompatActivity {
 
         Intent i = getIntent();
         token = i.getStringExtra("token");
+        myToken = i.getStringExtra("token");
 
         System.out.println(token);
 

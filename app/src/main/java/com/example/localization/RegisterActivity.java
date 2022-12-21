@@ -33,6 +33,8 @@ import retrofit2.Retrofit;
 
 public class RegisterActivity extends AppCompatActivity {
 
+    public static String myToken;
+
     Button singUp;
     EditText username, mail, password, password2;
 
@@ -107,6 +109,9 @@ public class RegisterActivity extends AppCompatActivity {
                     RegisterResponse registerResponse = response.body();
 
                     Intent i = new Intent(RegisterActivity.this, HomeActivity.class);
+
+                    myToken = registerResponse.getToken();
+
                     i.putExtra("token", registerResponse.getToken());
                     i.putExtra("expire", registerResponse.getExpire());
 
