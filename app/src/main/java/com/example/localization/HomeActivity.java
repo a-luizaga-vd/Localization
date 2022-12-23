@@ -6,9 +6,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
+import com.example.localization.sockets.TestSocket;
+
 public class HomeActivity extends AppCompatActivity {
 
     public static String myToken;
+    public static String username;
 
     String token;
 
@@ -20,10 +23,9 @@ public class HomeActivity extends AppCompatActivity {
         Intent i = getIntent();
         token = i.getStringExtra("token");
         myToken = i.getStringExtra("token");
+        username = i.getStringExtra("username");
 
         System.out.println(token);
-
-
 
     }
 

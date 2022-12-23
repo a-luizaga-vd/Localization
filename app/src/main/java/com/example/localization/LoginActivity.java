@@ -95,6 +95,7 @@ public class LoginActivity extends AppCompatActivity {
                     myToken = loginResponse.getToken();
                     i.putExtra("token", loginResponse.getToken());
                     i.putExtra("expire", loginResponse.getExpire());
+                    i.putExtra("username", username.getText().toString());
 
                     startActivity(i);
 
