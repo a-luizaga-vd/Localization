@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.localization.HomeActivity;
@@ -21,6 +22,7 @@ public class TestSocket extends AppCompatActivity {
     Button btnConnect, btnDisconnect, btnJoinLeave;
     HubConnection hubConnection;
     String token, username;
+    TextView tvUsername;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +54,9 @@ public class TestSocket extends AppCompatActivity {
         btnConnect = findViewById(R.id.buttonConnect);
         btnDisconnect = findViewById(R.id.buttonDisconnect);
         btnJoinLeave = findViewById(R.id.buttonJoinGroup);
+        tvUsername = findViewById(R.id.textViewUsername);
+
+        tvUsername.setText(username);
     }
 
     public void doConnection(View v){
