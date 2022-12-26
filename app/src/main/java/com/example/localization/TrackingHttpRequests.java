@@ -29,6 +29,7 @@ public class TrackingHttpRequests extends AppCompatActivity {
     private static int MY_BACKGROUND_LOCATION_REQUEST = 100;
     Intent intentService;
     Button btnStarService, btnStopService;
+    Button btnViewOnMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -146,6 +147,16 @@ public class TrackingHttpRequests extends AppCompatActivity {
         ActivityCompat.requestPermissions(this,
                 new String[]{Manifest.permission.ACCESS_BACKGROUND_LOCATION},
                 MY_BACKGROUND_LOCATION_REQUEST);
+    }
+
+    public void goToViewOnMapActivity(View v){
+
+        if(MyBackgroundService.myLocation!=null){
+            Intent i = new Intent(TrackingHttpRequests.this, ViewOnMapActivity.class);
+            //i.putExtra("token", token);
+            startActivity(i);
+        }
+
     }
 
 }

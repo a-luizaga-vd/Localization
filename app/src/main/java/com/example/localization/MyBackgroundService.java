@@ -1,16 +1,12 @@
 package com.example.localization;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -23,23 +19,24 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
-import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
-import androidx.core.content.ContextCompat;
 
 import com.example.localization.requests.LocationRequest;
 import com.example.localization.services.LocationService;
-
-import java.text.DecimalFormat;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+
 public class MyBackgroundService extends Service implements LocationListener{
-    String latitude;
-    String longitude;
+    public static double latitude = 1;
+    public static double longitude = 1;
+    public static MarkerOptions markerOptions;
+    public static LatLng myLocation;
     String token;
 
     public static boolean isRunning = false;
@@ -93,25 +90,34 @@ public class MyBackgroundService extends Service implements LocationListener{
     @Override
     public void onLocationChanged(@NonNull Location location) {
 
-        System.out.println("NO PASAODASJDNASODNASLDNAS");
-        DecimalFormat df = new DecimalFormat("#.##");
+        latitude = location.getLatitude();
+        longitude = location.getLongitude();
+
+        System.out.println("Update Location: "+latitude+", "+ longitude);
+
+        /*DecimalFormat df = new DecimalFormat("#.##########");
         latitude = String.valueOf(df.format(location.getLatitude()));
-        longitude = String.valueOf(df.format(location.getLongitude()));
+        longitude = String.valueOf(df.format(location.getLongitude()));*/
 
-
+        /*** Utilizo loc para marcarlo en el mapa***/
+        myLocation = new LatLng(latitude, longitude);
+        markerOptions = new MarkerOptions().position(myLocation).title(HomeActivity.username);
+        /** **/
 
         //Log.e("GPStracker", String.valueOf(location.getLatitude())+", "+String.valueOf(location.getLongitude()));
-        Log.e("GPStracker", latitude+", "+longitude);
+        Log.e("Location updated:", latitude+", "+longitude);
 
+        // Create the body request
         LocationRequest locationRequest = new LocationRequest();
-        locationRequest.setLatitud(latitude);
-        locationRequest.setLogitud(longitude);
+        locationRequest.setLatitud(String.valueOf(latitude));
+        locationRequest.setLogitud(String.valueOf(longitude));
 
         // Variables random
         locationRequest.setString1("Hola");
         locationRequest.setString2("Chau");
         locationRequest.setString3("Buenas");
 
+        // Use of retrofit to request
         LocationService locationService = ApiClient.getRetrofit().create(LocationService.class);
 
         //String bearerToken = "Bearer "+LoginActivity.getMyToken();
@@ -181,14 +187,15 @@ public class MyBackgroundService extends Service implements LocationListener{
             this.onDestroy();
         }
         else {
-            if (isNetworkEnabled) {
+            /** View the state of providers */
+            /*if (isNetworkEnabled) {
                 System.out.println("Nertwork Provider is using..");
-                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 10000, 0, this);
-            }
+                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 0, this);
+            }*/
 
             if (isGPSEnabled) {
                 System.out.println("GPS Provider is using..");
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 10000, 0, this);
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 0, this);
             } /*else {
                 System.out.println("The providers is disabled");
                 Toast.makeText(this, "Please enable the GPS sensors", Toast.LENGTH_SHORT).show();
@@ -211,6 +218,6 @@ public class MyBackgroundService extends Service implements LocationListener{
         System.out.println("The Service is destroyed");
         locationManager.removeUpdates(this);
         isRunning = false;
-
     }
+
 }
