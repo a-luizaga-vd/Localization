@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Localization</string>
+    <string name="view_others">view others</string>
+    <string name="go_to_bidding">Go to Bidding</string>
+    <string name="limit_time">Limit time</string>
+    <string name="opening_bid">Opening bid</string>
+    <string name="setting_bidding">Setting Bidding</string>
 </resources>

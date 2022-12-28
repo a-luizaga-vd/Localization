@@ -3,6 +3,7 @@ package com.example.localization;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
@@ -61,6 +62,7 @@ public class ViewOnMapActivity extends AppCompatActivity implements OnMapReadyCa
             //mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(MyBackgroundService.loc, 15.0f), 10000, null);
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(MyBackgroundService.myLocation, 10));
             mMap.setMyLocationEnabled(true);
+            mMap.getUiSettings().setZoomControlsEnabled(true);
         }
         else{
             LatLng SanJusto = new LatLng(-34.68668029836901, -58.563553532921745);
@@ -179,5 +181,9 @@ public class ViewOnMapActivity extends AppCompatActivity implements OnMapReadyCa
         handler.removeCallbacks(runnable); //stop handler when activity not visible super.onPause();
     }
 
+    public void goToSettingBiddingActivity(View v) {
+        Intent intent = new Intent( this, SettingBiddingActivity.class);
+        startActivity(intent);
+    }
 
 }
