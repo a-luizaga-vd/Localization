@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -14,8 +13,9 @@ import com.example.localization.R;
 import com.microsoft.signalr.HubConnection;
 import com.microsoft.signalr.HubConnectionBuilder;
 import com.microsoft.signalr.HubConnectionState;
+import com.microsoft.signalr.TypeReference;
 
-import java.util.Locale;
+import java.lang.reflect.Type;
 
 public class TestSocket extends AppCompatActivity {
 
@@ -35,21 +35,33 @@ public class TestSocket extends AppCompatActivity {
         System.out.println("Username"+username);
 
         // Create hubconnection
-        /*hubConnection = HubConnectionBuilder.create("http://35.239.225.98:443/hubs/chat")
-                .withHeader("Authorization", "Bearer "+token)
-                .build();*/
-
-        hubConnection = HubConnectionBuilder.create("http://10.0.2.2:5004/hubs/chat")
+        hubConnection = HubConnectionBuilder.create("http://35.239.225.98:443/hubs/chat")
                 .withHeader("Authorization", "Bearer "+token)
                 .build();
 
+        /*hubConnection = HubConnectionBuilder.create("http://10.0.2.2:5004/hubs/chat")
+                .withHeader("Authorization", "Bearer "+token)
+                .build();*/
+
         hubConnection.on("NewUser", (msg) -> {
-            System.out.println("Messeage: "+(msg));
+            System.out.println("Message: "+(msg));
         }, String.class);
 
         hubConnection.on("LeftUser", (msg) -> {
             System.out.println((msg));
         }, String.class);
+
+        /** Receive Object custom */
+        Type newMessageType = new TypeReference<NewMessage>() { }.getType();
+        this.hubConnection.<NewMessage>on("NewMessage", (message) -> { // OK!!
+            System.out.println(message.UserName);
+            System.out.println(message.latitude);
+            System.out.println(message.logitude);
+        }, newMessageType);
+
+        /*hubConnection.on("NewMessage", (msg) -> {
+            System.out.println((msg));
+        }, String.class);*/
 
         btnConnect = findViewById(R.id.buttonConnect);
         btnDisconnect = findViewById(R.id.buttonDisconnect);
@@ -83,8 +95,8 @@ public class TestSocket extends AppCompatActivity {
 
         NewMessage message = new NewMessage();
         message.setUserName(username);
-        message.setLatitud("-100");
-        message.setLogitud("-50");
+        message.setLatitude("-100");
+        message.setLogitude("-50");
 
         if(btnJoinLeave.getText().toString().equalsIgnoreCase("join")){
             if(hubConnection.getConnectionState() == HubConnectionState.CONNECTED && !username.isEmpty()){
@@ -96,7 +108,7 @@ public class TestSocket extends AppCompatActivity {
                 btnJoinLeave.setText("leave");
             }
             else{
-                Toast.makeText(this, "You are not conneceted", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "You are not connected", Toast.LENGTH_SHORT).show();
             }
         }
         else{
@@ -108,9 +120,30 @@ public class TestSocket extends AppCompatActivity {
                     btnJoinLeave.setText("join");
                 }
                 else{
-                    Toast.makeText(this, "You are not conneceted", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "You are not connected", Toast.LENGTH_SHORT).show();
                 }
             }
         }
+    }
+
+    public void sendMessage(View v){
+        NewMessage message = new NewMessage();
+
+        message.setLatitude("150");
+        message.setLogitude("250");
+        message.setUserName("akexxxx");
+
+        // si esta conectado y unido al canal/grupo
+        if(hubConnection.getConnectionState() == HubConnectionState.CONNECTED &&
+                btnJoinLeave.getText().toString().equalsIgnoreCase("leave")){
+
+            /** Test to send message **/
+            hubConnection.send("SendMessage", message);
+        }
+        else{
+            Toast.makeText(this, "You are not connected", Toast.LENGTH_SHORT).show();
+        }
+
+
     }
 }

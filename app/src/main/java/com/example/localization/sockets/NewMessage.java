@@ -1,31 +1,32 @@
 package com.example.localization.sockets;
 
-public class NewMessage {
+
+public class NewMessage{
     public String UserName;
-    public String latitud;
-    public String logitud;
+    public String latitude;
+    public String logitude;
 
     public String getUserName() {
         return UserName;
     }
 
     public void setUserName(String userName) {
-        UserName = userName;
+        this.UserName = userName;
     }
 
-    public String getLatitud() {
-        return latitud;
+    public String getLatitude() {
+        return latitude;
     }
 
-    public void setLatitud(String latitud) {
-        this.latitud = latitud;
+    public void setLatitude(String latitude) {
+        this.latitude = latitude;
     }
 
-    public String getLogitud() {
-        return logitud;
+    public String getLogitude() {
+        return logitude;
     }
 
-    public void setLogitud(String logitud) {
-        this.logitud = logitud;
+    public void setLogitude(String logitude) {
+        this.logitude = logitude;
     }
 }
