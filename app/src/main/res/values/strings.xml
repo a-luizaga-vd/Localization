@@ -5,4 +5,5 @@
     <string name="limit_time">Limit time</string>
     <string name="opening_bid">Opening bid</string>
     <string name="setting_bidding">Setting Bidding</string>
+    <string name="start_bidding">Start bidding</string>
 </resources>
