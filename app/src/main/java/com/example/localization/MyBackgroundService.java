@@ -39,6 +39,8 @@ public class MyBackgroundService extends Service implements LocationListener{
     public static LatLng myLocation;
     String token;
 
+    public static String alert="210.0F";
+
     public static boolean isRunning = false;
     LocationManager locationManager;
     boolean isNetworkEnabled, isGPSEnabled;
@@ -113,7 +115,7 @@ public class MyBackgroundService extends Service implements LocationListener{
         locationRequest.setLogitud(String.valueOf(longitude));
 
         // Variables random
-        locationRequest.setString1("Hola");
+        locationRequest.setString1(alert);
         locationRequest.setString2("Chau");
         locationRequest.setString3("Buenas");
 

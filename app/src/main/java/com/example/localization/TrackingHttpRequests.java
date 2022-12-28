@@ -159,4 +159,11 @@ public class TrackingHttpRequests extends AppCompatActivity {
 
     }
 
+    public void sendAlert(View v){
+        if(MyBackgroundService.isRunning){
+            MyBackgroundService.alert="0.0F";
+            Toast.makeText(TrackingHttpRequests.this,"The Alert has been sent.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
 }
