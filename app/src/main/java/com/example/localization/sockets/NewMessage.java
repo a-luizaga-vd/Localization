@@ -2,16 +2,16 @@ package com.example.localization.sockets;
 
 
 public class NewMessage{
-    public String UserName;
+    public String userName;
     public String latitude;
     public String logitude;
 
     public String getUserName() {
-        return UserName;
+        return userName;
     }
 
     public void setUserName(String userName) {
-        this.UserName = userName;
+        this.userName = userName;
     }
 
     public String getLatitude() {

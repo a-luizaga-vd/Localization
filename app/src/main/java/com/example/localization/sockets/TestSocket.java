@@ -54,14 +54,11 @@ public class TestSocket extends AppCompatActivity {
         /** Receive Object custom */
         Type newMessageType = new TypeReference<NewMessage>() { }.getType();
         this.hubConnection.<NewMessage>on("NewMessage", (message) -> { // OK!!
-            System.out.println(message.UserName);
+            System.out.println(message.userName);
             System.out.println(message.latitude);
             System.out.println(message.logitude);
         }, newMessageType);
 
-        /*hubConnection.on("NewMessage", (msg) -> {
-            System.out.println((msg));
-        }, String.class);*/
 
         btnConnect = findViewById(R.id.buttonConnect);
         btnDisconnect = findViewById(R.id.buttonDisconnect);
@@ -74,37 +71,30 @@ public class TestSocket extends AppCompatActivity {
     public void doConnection(View v){
         if(hubConnection.getConnectionState() == HubConnectionState.DISCONNECTED){
             hubConnection.start();
-            Toast.makeText(this, "Conexion exitosa", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Successful Connection", Toast.LENGTH_SHORT).show();
         }
         else{
-            Toast.makeText(this, "Y estas conectado amigo..", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "You are already connected", Toast.LENGTH_SHORT).show();
         }
     }
 
     public void doDisconnection(View v){
         if(hubConnection.getConnectionState() == HubConnectionState.CONNECTED){
             hubConnection.stop();
-            Toast.makeText(this, "Te desconectaste chau...", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "You disconnected", Toast.LENGTH_SHORT).show();
         }
         else{
-            Toast.makeText(this, "No estas conectado todavia.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "You are not connected yet", Toast.LENGTH_SHORT).show();
         }
     }
 
     public void joinToGroup(View v){
-
-        NewMessage message = new NewMessage();
-        message.setUserName(username);
-        message.setLatitude("-100");
-        message.setLogitude("-50");
 
         if(btnJoinLeave.getText().toString().equalsIgnoreCase("join")){
             if(hubConnection.getConnectionState() == HubConnectionState.CONNECTED && !username.isEmpty()){
                 hubConnection.send("JoinGroup");
                 //System.out.println("JoinToGroup: "+ username);
 
-                /** Test to send messeage **/
-                /*hubConnection.send("NewMesseage", message);*/
                 btnJoinLeave.setText("leave");
             }
             else{
@@ -114,7 +104,7 @@ public class TestSocket extends AppCompatActivity {
         else{
             if(btnJoinLeave.getText().toString().equalsIgnoreCase("leave")){
                 if(hubConnection.getConnectionState() == HubConnectionState.CONNECTED){
-                    //String username = etName.getText().toString();
+
                     hubConnection.send("LeaveGroup");
                     System.out.println("LeaveGroup: "+ username);
                     btnJoinLeave.setText("join");
@@ -131,7 +121,7 @@ public class TestSocket extends AppCompatActivity {
 
         message.setLatitude("150");
         message.setLogitude("250");
-        message.setUserName("akexxxx");
+        message.setUserName(username);
 
         // si esta conectado y unido al canal/grupo
         if(hubConnection.getConnectionState() == HubConnectionState.CONNECTED &&
