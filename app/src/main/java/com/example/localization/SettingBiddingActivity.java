@@ -2,6 +2,7 @@ package com.example.localization;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
@@ -61,5 +62,8 @@ public class SettingBiddingActivity extends AppCompatActivity {
         newBid.setPrice(et_price.getText().toString());
         newBid.setMinutes(et_time.getText().toString());
         hubConnection.send("startBidding", newBid);
+
+        Intent i = new Intent(this, BiddingStatusActivity.class);
+        startActivity(i);
     }
 }

@@ -45,6 +45,11 @@ public class HomeActivity extends AppCompatActivity {
 
     }
 
+    public void goToMap(View v){
+        Intent i = new Intent(HomeActivity.this, MapsActivity.class);
+        startActivity(i);
+    }
+
     public void sendMessagge(View v){
         Intent i = new Intent(HomeActivity.this, TestSocket.class);
         startActivity(i);

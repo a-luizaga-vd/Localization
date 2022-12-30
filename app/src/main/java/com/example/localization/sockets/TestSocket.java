@@ -14,7 +14,6 @@ import com.microsoft.signalr.HubConnection;
 import com.microsoft.signalr.HubConnectionBuilder;
 import com.microsoft.signalr.HubConnectionState;
 import com.microsoft.signalr.TypeReference;
-
 import java.lang.reflect.Type;
 
 public class TestSocket extends AppCompatActivity {

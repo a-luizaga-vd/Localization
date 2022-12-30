@@ -78,6 +78,16 @@
                 android:value="" />
         </activity>
         <activity
+            android:name=".MapsActivity"
+            android:exported="true"
+            android:label="@string/title_activity_maps">
+        </activity>
+        <activity
+            android:name=".BiddingStatusActivity"
+            android:exported="true"
+            android:label="BiddingStatusActivity">
+        </activity>
+        <activity
             android:name=".LoginActivity"
             android:exported="true">
             <intent-filter>
