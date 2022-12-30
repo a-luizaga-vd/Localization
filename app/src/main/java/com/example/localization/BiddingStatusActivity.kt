@@ -3,13 +3,13 @@ package com.example.localization
 import android.os.Bundle
 import android.os.SystemClock
 import android.util.Log
+import android.view.View
 import android.widget.Chronometer
 import android.widget.Chronometer.OnChronometerTickListener
+import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-
-//import kotlin.coroutines.jvm.internal.CompletedContinuation.context
-
 
 class BiddingStatusActivity : AppCompatActivity(), OnChronometerTickListener {
 
@@ -20,34 +20,44 @@ class BiddingStatusActivity : AppCompatActivity(), OnChronometerTickListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_state_bidding)
 
-        startCounter()
+        val bundle = intent.extras
+        val etPrice = bundle?.getString("et_price");
+        val etTime = bundle?.getString("et_time");
+        val etProduct = bundle?.getString("et_product");
+
+        val textPrice = findViewById<TextView>(R.id.price_bid)
+        val textProduct = findViewById<TextView>(R.id.product_bid)
+        textPrice.text = etPrice.toString()
+        textProduct.text = etProduct.toString()
+        startCounter(etTime)
 
     }
 
     override fun onChronometerTick(chronometer: Chronometer) {
-        Log.e("onChronometerTick", "called")
+        Log.i("TIMER", "called")
         if (chronometer.text.toString().equals("00:00", ignoreCase = true)) {
             chronometer.stop();
             Toast.makeText(
                 this,
                 "time reached", Toast.LENGTH_SHORT
             ).show()
+            Log.v("TIMER", "Stopped")
         }
     }
 
-    //
-    private fun startCounter() {
+
+    private fun startCounter( time : String?) {
 
         counter = findViewById(R.id.chronometerBid)
         counter.isCountDown = true
 
         //para cambiar el tiempo base
-        counter.base = SystemClock.elapsedRealtime() + 10000
+        if (time != null) {
+            counter.base = (SystemClock.elapsedRealtime() + (time.toDouble() * 60000)).toLong()
+        }
 
         counter.onChronometerTickListener = this
-//        counter.setOnChronometerTickListener {
-//            this
-//        }
+
         counter.start()
         Log.v("TIMER", "Started")
     }

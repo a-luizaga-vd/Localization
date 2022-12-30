@@ -18,6 +18,7 @@ public class SettingBiddingActivity extends AppCompatActivity {
 
     EditText et_price;
     EditText et_time;
+    EditText et_product;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +29,7 @@ public class SettingBiddingActivity extends AppCompatActivity {
 
         et_price = findViewById(R.id.openingBinding);
         et_time = findViewById(R.id.limitNumber);
+        et_product = findViewById(R.id.product);
 
         hubConnection = HubConnectionBuilder.create("http://35.239.225.98:443/hubs/bids")
                 .withHeader("Authorization", "Bearer " + token)
@@ -64,6 +66,13 @@ public class SettingBiddingActivity extends AppCompatActivity {
         hubConnection.send("startBidding", newBid);
 
         Intent i = new Intent(this, BiddingStatusActivity.class);
+
+        Bundle bundle = new Bundle();
+        bundle.putString("et_price", et_price.getText().toString());
+        bundle.putString("et_time", et_time.getText().toString());
+        bundle.putString("et_product", et_product.getText().toString());
+        i.putExtras(bundle);
+
         startActivity(i);
     }
 }

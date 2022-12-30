@@ -2,13 +2,13 @@
     <string name="app_name">Localization</string>
     <string name="view_others">view others</string>
     <string name="go_to_bidding">Go to Bidding</string>
-    <string name="limit_time">Limit time</string>
+    <string name="limit_time">Limit time (min)</string>
     <string name="opening_bid">Opening bid</string>
     <string name="setting_bidding">Setting Bidding</string>
     <string name="start_bidding">Start bidding</string>
     <string name="title_activity_maps">MapsActivity</string>
     <string name="bidding_status">Bidding status</string>
     <string name="product">Product:</string>
-    <string name="initial_bidding">Initial Bidding:</string>
+    <string name="initial_bidding">Initial Bidding: $</string>
     <string name="last_bids">Last bids</string>
 </resources>
