@@ -197,7 +197,7 @@ public class MyBackgroundService extends Service implements LocationListener{
 
             if (isGPSEnabled) {
                 System.out.println("GPS Provider is using..");
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 0, this);
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, this);
             } /*else {
                 System.out.println("The providers is disabled");
                 Toast.makeText(this, "Please enable the GPS sensors", Toast.LENGTH_SHORT).show();

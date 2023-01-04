@@ -8,9 +8,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.location.Location
-import android.os.Build
-import android.os.Bundle
-import android.os.Looper
+import android.os.*
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -19,6 +17,7 @@ import androidx.core.content.ContextCompat
 import com.example.localization.response.LocationResponse
 import com.example.localization.services.LocationService
 import com.google.android.gms.location.*
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
@@ -34,7 +33,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     var mapFrag: SupportMapFragment? = null
     lateinit var mLocationRequest: LocationRequest
 
-    var listLocation : ArrayList<LocationResponse>? = null
+    var listLocation: ArrayList<LocationResponse>? = null
 
     fun getArrayLocations(): ArrayList<LocationResponse>? {
         return listLocation
@@ -42,58 +41,54 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     //    lateinit var locationService : LocationService
     var mLastLocation: Location? = null
-    internal var mCurrLocationMarker: Marker? = null
+
+    private var mapMarkers: HashMap<String, Marker?> = HashMap()
+
     private var mFusedLocationClient: FusedLocationProviderClient? = null
 
     private var mLocationCallback: LocationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
-            val locationList = locationResult.locations
-            if (locationList.isNotEmpty()) {
-                // Returns locations computed, ordered from oldest to newest.
-                // The last location in the list is the newest
-                val location = locationList.last()
-                //esto mas que nada para ver info en el log
-                Log.i(
-                    "MapsActivity",
-                    "Location: " + location.getLatitude() + " " + location.getLongitude()
-                )
-                mLastLocation = location
-                if (mCurrLocationMarker != null) {
-                    mCurrLocationMarker?.remove()
-                }
-
-                //pone el marcador actual
-                getLocations()
-                val locations = getArrayLocations()
-                if (locations != null) {
-                    Log.v("retrofit", locations.size.toString())
-                }
-                if (locations != null) {
-                    for( i in 0 until locations.size){
-
-//                        val user = locations[i].userName
-//                        val lat  = locations[i].latitud
-//                        val long = locations[i].logitud
-                        val latLng = LatLng(
-                            locations[i].latitud.toDouble(), locations[i].logitud.toDouble())
-                        placeMarker(latLng, locations[i].userName )
-
-                        Log.v("retrofit", "****************************")
-                        Log.v("retrofit8", locations[i].userName.toString())
-                        Log.v("retrofit", "****************************")
-                    }
-                }
-//                val latLng = LatLng(location.latitude, location.longitude)
-//                val markerOptions = MarkerOptions()
-//                markerOptions.position(latLng)
-//                markerOptions.title("Aca estoy en bici").snippet("hola!")
-//                markerOptions.icon(
-//                    BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)
+//            val locationList = locationResult.locations
+//            if (locationList.isNotEmpty()) {
+//                // Returns locations computed, ordered from oldest to newest.
+//                // The last location in the list is the newest
+//                val location = locationList.last()
+//                //esto mas que nada para ver info en el log
+//                Log.i(
+//                    "MapsActivity",
+//                    "Location: " + location.getLatitude() + " " + location.getLongitude()
 //                )
-//                mCurrLocationMarker = mGoogleMap.addMarker(markerOptions)
-                //mueve la camara // probar otros zooms
-//                mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18.0F))
+//                mLastLocation = location
+
+            getLocations()
+
+//                mapMarkers?.clear()
+
+            //pone el marcador actual
+
+            val locations = getArrayLocations()
+            if (locations != null) {
+                Log.v("retrofit", locations.size.toString())
             }
+            if (locations != null) {
+                for (i in 0 until locations.size) {
+
+                    val latLng = LatLng(
+                        locations[i].latitud.toDouble(), locations[i].logitud.toDouble()
+                    )
+                    placeMarker(latLng, locations[i].userName, locations[i].string1)
+
+                    Log.v("retrofit", "****************************")
+                    Log.v("retrofit8", locations[i].userName.toString())
+                    Log.v("retrofit8", locations[i].latitud.toString())
+                    Log.v("retrofit8", locations[i].logitud.toString())
+                    Log.v("retrofit8", locations[i].string1.toString())
+                    Log.v("retrofit", "****************************")
+                }
+            }
+//                mCurrLocationMarker = mGoogleMap.addMarker(markerOptions)
+            //mueve la camara // probar otros zooms
+//            }
         }
     }
 
@@ -105,9 +100,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
-        mapFrag = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment?
+        mapFrag = supportFragmentManager.findFragmentById(R.id.map1) as SupportMapFragment?
         mapFrag?.getMapAsync(this)
-
 //        listLocation = null
 //        getLocations()
     }
@@ -126,8 +120,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mGoogleMap.uiSettings.isZoomControlsEnabled = true
 
         mLocationRequest = LocationRequest.create()
-        mLocationRequest.interval = 3000 // 120000 two minute interval
-        mLocationRequest.fastestInterval = 3000
+        mLocationRequest.interval = 1000 // 120000 two minute interval
+        mLocationRequest.fastestInterval = 1000
         mLocationRequest.priority = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -142,7 +136,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     mLocationCallback,
                     Looper.myLooper()
                 )
-                mGoogleMap.isMyLocationEnabled = true
+                mGoogleMap.isMyLocationEnabled = false
             } else {
                 //pedir permisos de locacion
                 checkLocationPermission()
@@ -153,8 +147,44 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 mLocationCallback,
                 Looper.myLooper()
             )
-            mGoogleMap.isMyLocationEnabled = true
+            mGoogleMap.isMyLocationEnabled = false
+
+//            val onMarkerClickedListener =
+//                OnMarkerClickListener { marker ->
+//                    if (marker.isInfoWindowShown) {
+//                        marker.hideInfoWindow()
+//                    } else {
+//                        marker.showInfoWindow()
+//                    }
+//                    true
+//                }
+
+//            mGoogleMap.setOnMarkerDragListener(object : OnMarkerDragListener {
+//                override fun onMarkerDragStart(arg0: Marker) {
+//                    // TODO Auto-generated method stub
+//                    Log.d(
+//                        "System out",
+//                        "onMarkerDragStart..." + arg0.position.latitude + "..." + arg0.position.longitude
+//                    )
+//                }
+//
+//                override fun onMarkerDragEnd(arg0: Marker) {
+//                    // TODO Auto-generated method stub
+//                    Log.d(
+//                        "System out",
+//                        "onMarkerDragEnd..." + arg0.position.latitude + "..." + arg0.position.longitude
+//                    )
+//                }
+//
+//                override fun onMarkerDrag(arg0: Marker) {
+//                    // TODO Auto-generated method stub
+//                    Log.i("System out", "onMarkerDrag...")
+//                }
+//            })
+
+//            mGoogleMap.setOnMarkerClickListener(onMarkerClickedListener);
         }
+
     }
 
     private fun getLocations() {
@@ -164,12 +194,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val result = locationService.getLocation(bearerToken)
 
         result.enqueue(object : Callback<ArrayList<LocationResponse>> {
-
-//            @Override
-//            fun onResponse(call: Call<RegisterResponse?>?, response: Response<RegisterResponse?>?) {
-//                val statusCode = response?.code();
-//                val registerResponse: RegisterResponse? = response?.body()
-//            }
 
             override fun onResponse(
                 call: Call<ArrayList<LocationResponse>>,
@@ -221,30 +245,58 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         )
     }
 
-    private fun placeMarker( location: LatLng, name : String) {
+    private fun placeMarker(location: LatLng, name: String, color : String) {
 //        val markerOption = MarkerOptions().position(location)
 
         fun bitmapDescriptorFromVector(context: Context, vectorResId: Int): BitmapDescriptor? {
             return ContextCompat.getDrawable(context, vectorResId)?.run {
                 setBounds(0, 0, intrinsicWidth, intrinsicHeight)
-                val bitmap = Bitmap.createBitmap(intrinsicWidth, intrinsicHeight, Bitmap.Config.ARGB_8888)
+                val bitmap =
+                    Bitmap.createBitmap(intrinsicWidth, intrinsicHeight, Bitmap.Config.ARGB_8888)
                 draw(Canvas(bitmap))
                 BitmapDescriptorFactory.fromBitmap(bitmap)
             }
         }
 
-        val markerOption =
-            MarkerOptions()
-                .position(location)
-                .title(name)
-                .snippet("hola!")
+        Log.v("MARKER", name)
+
+        if (!mapMarkers.containsKey(name)){
+            Log.v("MARKER2", mapMarkers.containsKey(name).toString())
+            Log.v("MARKER2", "ACA")
+            val markerOption =
+                MarkerOptions()
+                    .position(location)
+                    .title(name)
+                    .snippet("hola!")
+                    .draggable(true)
 //                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED ))
-                .icon(bitmapDescriptorFromVector(this, R.drawable.ic_car))
-//                .icon(BitmapDescriptorFactory.fromFile("C:\\Users\\Virtual Dreams\\Desktop\\vd\\app\\src\\main\\res\\drawable-v24\\ic_car_f.png"))
+                    .icon(bitmapDescriptorFromVector(this, R.drawable.ic_car_blue))
 //                .icon(BitmapDescriptorFactory.fromPath(
 //                    "C:\\Users\\Leandro\\Documents\\RepositorioVD\\vd\\app\\src\\main\\res\\drawable\\auto.png"))
 
-        mCurrLocationMarker = mGoogleMap.addMarker(markerOption)
+
+            val mCurrLocationMarker = mGoogleMap.addMarker(markerOption)
+            mCurrLocationMarker?.isVisible = true;
+            mCurrLocationMarker?.showInfoWindow();
+            if (mCurrLocationMarker != null) {
+                mapMarkers[name] = mCurrLocationMarker
+                Log.v("MARKER2", "agrega")
+                Log.v("MARKER2", mapMarkers.get(name).toString())
+            }
+        } else if (mapMarkers[name]?.position != location) {
+            MarkerAnimation.animateMarkerToICS(
+                mapMarkers, name, location,
+                LatLngInterpolator.Spherical()
+            )
+            Log.v("MARKER2", mapMarkers.containsKey(name).toString())
+        }
+
+        if( mapMarkers.containsKey(name) && color == "0.0F")
+            mapMarkers[name]?.setIcon(bitmapDescriptorFromVector(this, R.drawable.ic_car_red))
+        else if(mapMarkers.containsKey(name))
+            mapMarkers[name]?.setIcon(bitmapDescriptorFromVector(this, R.drawable.ic_car_blue))
+
+//        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 18.0F))
     }
 
     private fun checkLocationPermission() {

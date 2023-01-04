@@ -23,7 +23,7 @@
         android:layout_marginStart="32dp"
         android:layout_marginTop="20dp"
         android:text="@string/product"
-        android:textSize="18dp"
+        android:textSize="20dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/title_bidding_status" />
 
@@ -32,9 +32,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="12dp"
         android:text="@string/initial_bidding"
-        android:textSize="18dp"
+        android:textSize="20dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/product_text" />
 
@@ -45,7 +45,7 @@
         android:layout_marginStart="32dp"
         android:layout_marginTop="8dp"
         android:text="@string/last_bids"
-        android:textSize="18dp"
+        android:textSize="20dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/initial_bid" />
 
@@ -53,9 +53,9 @@
         android:id="@+id/price_bid"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="136dp"
-        android:layout_marginTop="8dp"
-        android:textSize="18dp"
+        android:layout_marginStart="152dp"
+        android:layout_marginTop="12dp"
+        android:textSize="20dp"
         app:layout_constraintStart_toStartOf="@+id/initial_bid"
         app:layout_constraintTop_toBottomOf="@+id/product_bid" />
 
@@ -65,7 +65,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="20dp"
-        android:textSize="18dp"
+        android:textSize="20dp"
         app:layout_constraintStart_toEndOf="@+id/product_text"
         app:layout_constraintTop_toBottomOf="@+id/title_bidding_status" />
 
@@ -81,10 +81,10 @@
         android:id="@+id/chronometerBid"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="100dp"
-        android:layout_marginTop="104dp"
-        android:textSize="22dp"
-        app:layout_constraintStart_toEndOf="@+id/price_bid"
+        android:layout_marginStart="188dp"
+        android:layout_marginTop="96dp"
+        android:textSize="24dp"
+        app:layout_constraintStart_toEndOf="@+id/product_text"
         app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
