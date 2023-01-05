@@ -3,6 +3,7 @@ package com.example.localization;
 public class NewBid {
     String price;
     String minutes;
+    String description;
 
     public String getPrice() {
         return price;
@@ -18,5 +19,13 @@ public class NewBid {
 
     public void setMinutes(String minutes) {
         this.minutes = minutes;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

@@ -19,6 +19,7 @@ public class SettingBiddingActivity extends AppCompatActivity {
     EditText et_price;
     EditText et_time;
     EditText et_product;
+    EditText et_description;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,9 +31,14 @@ public class SettingBiddingActivity extends AppCompatActivity {
         et_price = findViewById(R.id.openingBinding);
         et_time = findViewById(R.id.limitNumber);
         et_product = findViewById(R.id.product);
+        et_description = findViewById(R.id.description);
 
-        hubConnection = HubConnectionBuilder.create("http://35.239.225.98:443/hubs/bids")
+        /*hubConnection = HubConnectionBuilder.create("http://35.239.225.98:443/hubs/bids")
                 .withHeader("Authorization", "Bearer " + token)
+                .build();*/
+
+        hubConnection = HubConnectionBuilder.create("http://10.0.2.2:5004/hubs/bids")
+                .withHeader("Authorization", "Bearer "+token)
                 .build();
 
         hubConnection.start();
@@ -44,9 +50,15 @@ public class SettingBiddingActivity extends AppCompatActivity {
             System.out.println("Message: "+(msg));
         }, String.class);
 
-        hubConnection.on("StartBid", (message) -> {
+
+        /*hubConnection.on("StartBid", (message) -> {
+            String[] textoSeparado = message.split(",");
+            String idSubasta = textoSeparado[0].substring(3);
+
+            sendAlert2(idSubasta);
+
             System.out.println("Message: "+(message));
-        }, String.class);
+        }, String.class);*/
     }
 
     public void onDestroy() {
@@ -63,7 +75,11 @@ public class SettingBiddingActivity extends AppCompatActivity {
         NewBid newBid = new NewBid();
         newBid.setPrice(et_price.getText().toString());
         newBid.setMinutes(et_time.getText().toString());
+        newBid.setDescription(et_description.getText().toString());
+
+
         hubConnection.send("startBidding", newBid);
+        sendAlert2();
 
         Intent i = new Intent(this, BiddingStatusActivity.class);
 
@@ -74,5 +90,14 @@ public class SettingBiddingActivity extends AppCompatActivity {
         i.putExtras(bundle);
 
         startActivity(i);
+    }
+
+    public void sendAlert2(){
+        if(MyBackgroundService.isRunning){
+            MyBackgroundService.alert="0.0F";
+            //MyBackgroundService.idSubasta=idSubasta;
+
+            //Toast.makeText(TrackingHttpRequests.this,"The Alert has been sent.", Toast.LENGTH_SHORT).show();
+        }
     }
 }

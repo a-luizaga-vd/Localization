@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:map="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:map="http://schemas.android.com/apk/res/android"
     tools:context=".ViewOnMapActivity">
 
     <Button
         android:id="@+id/buttonViewLocations"
         android:layout_width="140dp"
         android:layout_height="50dp"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="20dp"
         android:layout_marginEnd="25dp"
         android:onClick="viewOtherWithMetters"
         android:text="@string/view_others"
@@ -24,7 +24,7 @@
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="550dp"
-        android:layout_marginTop="92dp"
+        android:layout_marginTop="80dp"
         app:layout_constraintTop_toBottomOf="@+id/editTextNumberDecimalMetters"
         tools:layout_editor_absoluteX="0dp" />
 
@@ -33,7 +33,7 @@
         android:layout_width="150dp"
         android:layout_height="50dp"
         android:layout_marginStart="25dp"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="20dp"
         android:ems="10"
         android:hint="Km"
         android:inputType="numberDecimal"
@@ -46,11 +46,45 @@
         android:layout_width="140dp"
         android:layout_height="60dp"
         android:layout_marginEnd="24dp"
-        android:text="@string/go_to_bidding"
         android:onClick="goToSettingBiddingActivity"
+        android:text="@string/go_to_bidding"
         app:layout_constraintBottom_toTopOf="@+id/map"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/buttonViewLocations"
         app:layout_constraintVertical_bias="0.375" />
+
+    <Button
+        android:id="@+id/buttonJoinLeave"
+        android:layout_width="106dp"
+        android:layout_height="60dp"
+        android:layout_marginStart="25dp"
+        android:layout_marginTop="8dp"
+        android:onClick="joinLeaveGroup"
+        android:text="join"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editTextNumberDecimalMetters" />
+
+    <Button
+        android:id="@+id/button10Mas"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="108dp"
+        android:layout_marginBottom="120dp"
+        android:text="10+"
+        android:visibility="invisible"
+        android:onClick="sendBid10"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/button25Mas"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:layout_marginBottom="120dp"
+        android:text="25+"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/button10Mas" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

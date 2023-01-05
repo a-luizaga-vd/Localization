@@ -1,5 +1,6 @@
 package com.example.localization;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
@@ -7,10 +8,14 @@ import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.localization.bids.ActiveBids;
+import com.example.localization.bids.Bidup;
 import com.example.localization.response.LocationResponse;
 import com.example.localization.services.LocationService;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -19,9 +24,18 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.microsoft.signalr.HubConnection;
+import com.microsoft.signalr.HubConnectionBuilder;
+import com.microsoft.signalr.HubConnectionState;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -35,6 +49,21 @@ public class ViewOnMapActivity extends AppCompatActivity implements OnMapReadyCa
     Runnable runnable;
     int delay = 5000;
 
+    ArrayList<Marker> newMarkers;
+    ArrayList<Marker> oldMarkers = new ArrayList<>();
+
+    ArrayList<Marker> redMarkers;
+    Map<String, Marker> hashMapRed = new HashMap<>();
+
+    HubConnection hubConnection;
+    String token;
+    Button btJoinLeaveGroup;
+    ArrayList<ActiveBids> listActiveBids = new ArrayList<>();
+
+    Button bt10Mas;
+    Button bt25Mas;
+    String idSendBid;
+    Bidup bid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +75,64 @@ public class ViewOnMapActivity extends AppCompatActivity implements OnMapReadyCa
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        btJoinLeaveGroup = findViewById(R.id.buttonJoinLeave);
+        bt10Mas = findViewById(R.id.button10Mas);
+        bt25Mas = findViewById(R.id.button25Mas);
+
+        /** Subastas */
+        token = HomeActivity.myToken;
+
+        /*hubConnection = HubConnectionBuilder.create("http://35.239.225.98:443/hubs/bids")
+                .withHeader("Authorization", "Bearer " + token)
+                .build();*/
+
+        hubConnection = HubConnectionBuilder.create("http://10.0.2.2:5004/hubs/bids")
+                .withHeader("Authorization", "Bearer "+token)
+                .build();
+
+        hubConnection.start();
+        Toast.makeText(this, "Conexion exitosa", Toast.LENGTH_SHORT).show();
+
+        if(hubConnection.getConnectionState() == HubConnectionState.CONNECTED){
+            hubConnection.send("JoinGroup");
+        }
+
+        hubConnection.on("NewUser", (msg) -> {
+            Gson g = new Gson();
+
+            Type listType = new TypeToken<ArrayList<ActiveBids>>() {}.getType();
+            listActiveBids = g.fromJson(msg , listType);
+
+            System.out.println("Message: "+(msg));
+        }, String.class);
+
+        hubConnection.on("StartBid", (message) -> {
+            // Llega una subasta
+            String[] messageSplit = message.split(",");
+
+            String idSubasta = messageSplit[0].substring(3);
+            String price = messageSplit[1].substring(7).trim();
+            String description = messageSplit[3].substring(14);
+            String owner = messageSplit[4].substring(8);
+
+            ActiveBids activeBids = new ActiveBids();
+            activeBids.setId(idSubasta);
+            activeBids.setFinalPrice(price);
+            activeBids.setDescription(description);
+            activeBids.setUsername(owner);
+
+            listActiveBids.add(activeBids);
+        }, String.class);
+
+
+        hubConnection.on("Bid", (message) -> {
+            Log.e("Response Bid", message);
+
+            //System.out.println("Response Bid: "+(message));
+        }, String.class);
+
+        /**************************************/
     }
 
     @SuppressLint("MissingPermission")
@@ -58,7 +145,7 @@ public class ViewOnMapActivity extends AppCompatActivity implements OnMapReadyCa
 
             //mMap.addMarker(new MarkerOptions().position(MyBackgroundService.myLocation).title("Marker in My location"));
             mMap.addMarker(MyBackgroundService.markerOptions.icon(BitmapDescriptorFactory
-                    .defaultMarker(210.0F)));
+                    .defaultMarker(210.0F)));//.setTag("210.0F");
             //mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(MyBackgroundService.loc, 15.0f), 10000, null);
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(MyBackgroundService.myLocation, 10));
             mMap.setMyLocationEnabled(true);
@@ -71,6 +158,47 @@ public class ViewOnMapActivity extends AppCompatActivity implements OnMapReadyCa
                     .title("Marker in San Justo"));
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(SanJusto,10));
         }
+
+        // adding on click listener to marker of google maps.
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+
+                /*String tag = marker.getTag().toString();
+                if(tag.equals("0.0F")){
+                    // on marker click we are getting the title of our marker
+                    // which is clicked and displaying it in a toast message.
+                    String markerName = marker.getTitle();
+                    Toast.makeText(ViewOnMapActivity.this, "Clicked location is " + markerName +"Color:"+marker.getTag(), Toast.LENGTH_SHORT).show();
+                }*/
+                if(marker.getTag()!=null){
+
+                    bt10Mas.setVisibility(View.VISIBLE);
+                    bt25Mas.setVisibility(View.VISIBLE);
+
+                    ActiveBids activeBids = (ActiveBids) marker.getTag();
+
+                    idSendBid = activeBids.getId();
+
+                    bid = new Bidup();
+                    bid.setId(activeBids.getId());
+                    bid.setUsername(marker.getTitle());
+                    bid.setPrice(activeBids.getFinalPrice());
+
+                    Toast.makeText(ViewOnMapActivity.this, "IdSubasta: " + activeBids.getId() +"\nFinal Price: "+activeBids.getFinalPrice(), Toast.LENGTH_LONG).show();
+                }
+
+                return false;
+            }
+        });
+
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(@NonNull LatLng latLng) {
+                bt10Mas.setVisibility(View.INVISIBLE);
+                bt25Mas.setVisibility(View.INVISIBLE);
+            }
+        });
 
     }
 
@@ -122,7 +250,14 @@ public class ViewOnMapActivity extends AppCompatActivity implements OnMapReadyCa
                                     startPoint.setLongitude(Double.parseDouble(locationResponse.get(indexMyLocation).getLogitud()));
 
                                     double lat, lng;
-                                    mMap.clear();
+
+                                    //mMap.clear();
+                                    for(Marker marker:oldMarkers){
+                                        marker.remove();
+                                    }
+
+                                    // creo de 0 el nuevo arrary de marcker con las nuevas ubicaciones
+                                    newMarkers = new ArrayList<>();
                                     for(int j=0; j<size;j++){
                                         if(j != indexMyLocation){
                                             Location endPoint=new Location("locationB");
@@ -133,23 +268,64 @@ public class ViewOnMapActivity extends AppCompatActivity implements OnMapReadyCa
 
                                             if((distance)<Double.parseDouble(editTextMetters.getText().toString())){
 
-                                                /**Toast.makeText(getApplicationContext(), "Distance: "+ distance, Toast.LENGTH_SHORT).show();*/
+                                                String color = locationResponse.get(j).getString1();
+                                                if(color.equals("0.0F")){ // si esta en rojo
+                                                    if(!hashMapRed.containsKey(locationResponse.get(j).getUserName())){
+                                                        // lo marco en el mapa
+                                                        lat = Double.parseDouble(locationResponse.get(j).getLatitud());
+                                                        lng = Double.parseDouble(locationResponse.get(j).getLogitud());
+                                                        LatLng loc = new LatLng(lat, lng);
+                                                        Marker marker = mMap.addMarker(new MarkerOptions()
+                                                                .position(loc)
+                                                                .title(locationResponse.get(j).getUserName())
+                                                                .icon(BitmapDescriptorFactory.defaultMarker(Float.parseFloat(locationResponse.get(j).getString1()))));
+                                                                //.icon(BitmapDescriptorFactory.defaultMarker((locationResponse.get(j).getString1()==null)?Float.parseFloat("210.0F"):Float.parseFloat(locationResponse.get(j).getString1()))));
 
-                                                // lo marco en el mapa
-                                                lat = Double.parseDouble(locationResponse.get(j).getLatitud());
-                                                lng = Double.parseDouble(locationResponse.get(j).getLogitud());
-                                                LatLng loc = new LatLng(lat, lng);
-                                                mMap.addMarker(new MarkerOptions()
-                                                        .position(loc)
-                                                        .title(locationResponse.get(j).getUserName())
-                                                        .icon(BitmapDescriptorFactory.defaultMarker(Float.parseFloat(locationResponse.get(j).getString1()))));
-                                                //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(loc,10));
+                                                        // Si esta en rojo es xq inicio una subasta, entonces ahora lo busco por userName (solo puede tener una subasta iniciada)
+                                                        if(!listActiveBids.isEmpty()){
+                                                            for (ActiveBids bids : listActiveBids){
+                                                                if(bids.getUsername().equals(locationResponse.get(j).getUserName())){
+                                                                    bids.setUsername(locationResponse.get(j).getUserName());
+                                                                    marker.setTag(bids);
+                                                                }
+                                                            }
+                                                        }
+
+                                                        //marker.setTag(color);
+                                                        hashMapRed.put(locationResponse.get(j).getUserName(), marker);
+                                                    }
+                                                }
+                                                else{// esta en azul
+                                                    // si esta en el hashmap de los markers rojos lo tengo que sacar xq ahora esta azul
+                                                    if(hashMapRed.containsKey(locationResponse.get(j).getUserName())){
+                                                        hashMapRed.get(locationResponse.get(j).getUserName()).remove();
+                                                        hashMapRed.remove(locationResponse.get(j).getUserName());
+                                                    }
+
+                                                    // lo marco en el mapa
+                                                    lat = Double.parseDouble(locationResponse.get(j).getLatitud());
+                                                    lng = Double.parseDouble(locationResponse.get(j).getLogitud());
+                                                    LatLng loc = new LatLng(lat, lng);
+                                                    Marker marker = mMap.addMarker(new MarkerOptions()
+                                                            .position(loc)
+                                                            .title(locationResponse.get(j).getUserName())
+                                                            .icon(BitmapDescriptorFactory.defaultMarker(Float.parseFloat(locationResponse.get(j).getString1()))));
+                                                            //.icon(BitmapDescriptorFactory.defaultMarker((locationResponse.get(j).getString1()!=null)?Float.parseFloat("210.0F"):Float.parseFloat(locationResponse.get(j).getString1()))));
+
+                                                    //marker.setTag(color);
+                                                    newMarkers.add(marker);
+                                                }
                                             }
                                             else{
+
                                                 Toast.makeText(getApplicationContext(), "Not users nears", Toast.LENGTH_SHORT).show();
                                             }
                                         }
                                     }
+                                    //termina el for
+                                    oldMarkers.clear();;
+                                    oldMarkers.addAll(newMarkers);
+
                                 }
                             }
                         }
@@ -184,6 +360,47 @@ public class ViewOnMapActivity extends AppCompatActivity implements OnMapReadyCa
     public void goToSettingBiddingActivity(View v) {
         Intent intent = new Intent( this, SettingBiddingActivity.class);
         startActivity(intent);
+    }
+
+    public void joinLeaveGroup(View v){
+
+        if(btJoinLeaveGroup.getText().toString().equalsIgnoreCase("join")){
+            if(hubConnection.getConnectionState() == HubConnectionState.CONNECTED){
+                hubConnection.send("JoinGroup");
+                btJoinLeaveGroup.setText("leave");
+            }
+            else{
+                Toast.makeText(this, "You are not connected", Toast.LENGTH_SHORT).show();
+            }
+        }
+        else{
+            if(btJoinLeaveGroup.getText().toString().equalsIgnoreCase("leave")){
+                if(hubConnection.getConnectionState() == HubConnectionState.CONNECTED){
+                    hubConnection.send("LeaveGroup");
+                    btJoinLeaveGroup.setText("join");
+                }
+                else{
+                    Toast.makeText(this, "You are not connected", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    }
+
+    public void sendBid10(View v){
+
+        int priceFinal = Integer.valueOf(bid.getPrice())+10;
+
+        bid.setPrice(String.valueOf(priceFinal));
+
+        if(hubConnection.getConnectionState() == HubConnectionState.CONNECTED){
+            hubConnection.send("SendBid", bid);
+            Toast.makeText(this, "You submitted a bid", Toast.LENGTH_SHORT).show();
+        }
+        else{
+            Toast.makeText(this, "You are not connected", Toast.LENGTH_SHORT).show();
+        }
+
+
     }
 
 }
