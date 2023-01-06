@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -20,6 +21,7 @@ public class SettingBiddingActivity extends AppCompatActivity {
     EditText et_time;
     EditText et_product;
     EditText et_description;
+    String idSubasta;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,13 +35,13 @@ public class SettingBiddingActivity extends AppCompatActivity {
         et_product = findViewById(R.id.product);
         et_description = findViewById(R.id.description);
 
-        /*hubConnection = HubConnectionBuilder.create("http://35.239.225.98:443/hubs/bids")
+        hubConnection = HubConnectionBuilder.create("http://35.239.225.98:443/hubs/bids")
                 .withHeader("Authorization", "Bearer " + token)
-                .build();*/
-
-        hubConnection = HubConnectionBuilder.create("http://10.0.2.2:5004/hubs/bids")
-                .withHeader("Authorization", "Bearer "+token)
                 .build();
+
+//        hubConnection = HubConnectionBuilder.create("http://10.0.2.2:5004/hubs/bids")
+//                .withHeader("Authorization", "Bearer "+token)
+//                .build();
 
         hubConnection.start();
         Toast.makeText(this, "Conexion exitosa", Toast.LENGTH_SHORT).show();
@@ -51,14 +53,24 @@ public class SettingBiddingActivity extends AppCompatActivity {
         }, String.class);
 
 
-        /*hubConnection.on("StartBid", (message) -> {
+        hubConnection.on("StartBid", (message) -> {
             String[] textoSeparado = message.split(",");
-            String idSubasta = textoSeparado[0].substring(3);
+            idSubasta = textoSeparado[0].substring(3);
 
-            sendAlert2(idSubasta);
+            Intent i = new Intent(this, BiddingStatusActivity.class);
 
+            Bundle bundle = new Bundle();
+            bundle.putString("et_price", et_price.getText().toString());
+            bundle.putString("et_time", et_time.getText().toString());
+            bundle.putString("et_product", et_product.getText().toString());
+            bundle.putString("id_subasta", idSubasta);
+            i.putExtras(bundle);
+
+            startActivity(i);
+
+            Log.e("SUbasta", idSubasta);
             System.out.println("Message: "+(message));
-        }, String.class);*/
+        }, String.class);
     }
 
     public void onDestroy() {
@@ -81,15 +93,15 @@ public class SettingBiddingActivity extends AppCompatActivity {
         hubConnection.send("startBidding", newBid);
         sendAlert2();
 
-        Intent i = new Intent(this, BiddingStatusActivity.class);
-
-        Bundle bundle = new Bundle();
-        bundle.putString("et_price", et_price.getText().toString());
-        bundle.putString("et_time", et_time.getText().toString());
-        bundle.putString("et_product", et_product.getText().toString());
-        i.putExtras(bundle);
-
-        startActivity(i);
+//        Intent i = new Intent(this, BiddingStatusActivity.class);
+//        Bundle bundle = new Bundle();
+//        bundle.putString("et_price", et_price.getText().toString());
+//        bundle.putString("et_time", et_time.getText().toString());
+//        bundle.putString("et_product", et_product.getText().toString());
+//        bundle.putString("id_subasta", idSubasta);
+//        i.putExtras(bundle);
+//
+//        startActivity(i);
     }
 
     public void sendAlert2(){

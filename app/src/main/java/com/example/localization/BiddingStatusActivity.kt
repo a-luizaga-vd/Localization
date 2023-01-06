@@ -6,24 +6,47 @@ import android.util.Log
 import android.view.View
 import android.widget.Chronometer
 import android.widget.Chronometer.OnChronometerTickListener
-import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.microsoft.signalr.Action1
+import com.microsoft.signalr.HubConnection
+import com.microsoft.signalr.HubConnectionBuilder
 
 class BiddingStatusActivity : AppCompatActivity(), OnChronometerTickListener {
 
-
+    private lateinit var hubConnection: HubConnection
+    var token: String? = null
     private lateinit var counter: Chronometer
+    private var idSubasta : String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_state_bidding)
 
+        token = HomeActivity.myToken
+
+        //Se crea la conexión
+        hubConnection = HubConnectionBuilder.create("http://35.239.225.98:443/hubs/bids")
+            .withHeader("Authorization", "Bearer $token")
+            .build()
+
+        hubConnection.start()
+
+        hubConnection.on(
+            "FinishBid",
+            Action1 { msg: String -> println("Message: $msg") },
+            String::class.java
+        )
+
         val bundle = intent.extras
         val etPrice = bundle?.getString("et_price");
         val etTime = bundle?.getString("et_time");
         val etProduct = bundle?.getString("et_product");
+        idSubasta = bundle?.getString("id_subasta")
+
+//        Log.i("ID SUBASTA", bundle?.getString("id_subasta"))
+        Log.i("ID SUBASTA", idSubasta.toString())
 
         val textPrice = findViewById<TextView>(R.id.price_bid)
         val textProduct = findViewById<TextView>(R.id.product_bid)
@@ -42,6 +65,7 @@ class BiddingStatusActivity : AppCompatActivity(), OnChronometerTickListener {
                 "time reached", Toast.LENGTH_SHORT
             ).show()
             Log.v("TIMER", "Stopped")
+
         }
     }
 
@@ -60,5 +84,9 @@ class BiddingStatusActivity : AppCompatActivity(), OnChronometerTickListener {
 
         counter.start()
         Log.v("TIMER", "Started")
+    }
+
+    fun cancelBidding(view: View) {
+        hubConnection.send("finishBid", idSubasta, true)
     }
 }
