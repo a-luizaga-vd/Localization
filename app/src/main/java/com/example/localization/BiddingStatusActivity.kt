@@ -27,9 +27,13 @@ class BiddingStatusActivity : AppCompatActivity(), OnChronometerTickListener {
         token = HomeActivity.myToken
 
         //Se crea la conexión
-        hubConnection = HubConnectionBuilder.create("http://35.239.225.98:443/hubs/bids")
-            .withHeader("Authorization", "Bearer $token")
-            .build()
+//        hubConnection = HubConnectionBuilder.create("http://35.239.225.98:443/hubs/bids")
+//            .withHeader("Authorization", "Bearer $token")
+//            .build()
+
+        hubConnection = HubConnectionBuilder.create("http://10.0.2.2:5004/hubs/bids")
+            .withHeader("Authorization", "Bearer "+token)
+            .build();
 
         hubConnection.start()
 
@@ -87,6 +91,10 @@ class BiddingStatusActivity : AppCompatActivity(), OnChronometerTickListener {
     }
 
     fun cancelBidding(view: View) {
-        hubConnection.send("finishBid", idSubasta, true)
+        hubConnection.send("finishBid", idSubasta, false)
+
+        MyBackgroundService.alert="210.0F"
+
+        //hubConnection.send("LeaveGroup")
     }
 }

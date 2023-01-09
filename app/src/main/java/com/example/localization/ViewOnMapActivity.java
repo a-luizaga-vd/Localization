@@ -33,6 +33,8 @@ import com.microsoft.signalr.HubConnectionBuilder;
 import com.microsoft.signalr.HubConnectionState;
 
 import java.lang.reflect.Type;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -63,7 +65,8 @@ public class ViewOnMapActivity extends AppCompatActivity implements OnMapReadyCa
     Button bt10Mas;
     Button bt25Mas;
     String idSendBid;
-    Bidup bid;
+    Bidup bidup;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,8 +116,12 @@ public class ViewOnMapActivity extends AppCompatActivity implements OnMapReadyCa
 
             String idSubasta = messageSplit[0].substring(3);
             String price = messageSplit[1].substring(7).trim();
+            String time = messageSplit[2].substring(9).trim();
             String description = messageSplit[3].substring(14);
             String owner = messageSplit[4].substring(8);
+
+            parseTime(time);
+            //LocalDateTime myDateObj = LocalDateTime.of();
 
             ActiveBids activeBids = new ActiveBids();
             activeBids.setId(idSubasta);
@@ -127,10 +134,41 @@ public class ViewOnMapActivity extends AppCompatActivity implements OnMapReadyCa
 
 
         hubConnection.on("Bid", (message) -> {
+
             Log.e("Response Bid", message);
 
-            //System.out.println("Response Bid: "+(message));
+            // parsear response puja
+            String [] messageSplit = message.split(",");
+            if(messageSplit.length == 3){
+
+                String username = messageSplit[0].substring(21); //creo que es el q va ganando, ponele, preguntar
+                String price = messageSplit[1].substring(9);
+
+                String [] idMalo = messageSplit[2].split(" ");
+                String id = idMalo[3];
+
+                //aca tendria que entrar al hashmapRed y setearle un nuevo objeto al marker (cambia noma el precio final)
+                // primero busco en el araylist de subastas activas por username que mapee con el hashmapred.
+                for(ActiveBids activeBids:listActiveBids){
+                    if(activeBids.getId().equals(id)){
+                        activeBids.setFinalPrice(price);
+
+                        hashMapRed.get(activeBids.getUsername()).setTag(null);
+                        hashMapRed.get(activeBids.getUsername()).setTag(activeBids);
+                    }
+                }
+            }
+            else{
+                Log.e("Response Bid", "No hacer nada, por ahora");
+            }
+
         }, String.class);
+
+        hubConnection.on("BidError", (msg) -> {
+            Log.e("Response Bid", msg);
+        }, String.class);
+
+
 
         /**************************************/
     }
@@ -171,21 +209,21 @@ public class ViewOnMapActivity extends AppCompatActivity implements OnMapReadyCa
                     String markerName = marker.getTitle();
                     Toast.makeText(ViewOnMapActivity.this, "Clicked location is " + markerName +"Color:"+marker.getTag(), Toast.LENGTH_SHORT).show();
                 }*/
+                ActiveBids activeBids;
+
                 if(marker.getTag()!=null){
 
                     bt10Mas.setVisibility(View.VISIBLE);
                     bt25Mas.setVisibility(View.VISIBLE);
 
-                    ActiveBids activeBids = (ActiveBids) marker.getTag();
+                    // declaro un IdSubasta y cuando oprimo sobre los marcadores le seteo el id que tiene el marker al idSubasta
+                    // entonces los botones ya le pujan a ese iD y fue
+
+                    activeBids = (ActiveBids) marker.getTag();
 
                     idSendBid = activeBids.getId();
 
-                    bid = new Bidup();
-                    bid.setId(activeBids.getId());
-                    bid.setUsername(marker.getTitle());
-                    bid.setPrice(activeBids.getFinalPrice());
-
-                    Toast.makeText(ViewOnMapActivity.this, "IdSubasta: " + activeBids.getId() +"\nFinal Price: "+activeBids.getFinalPrice(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(ViewOnMapActivity.this, "IdSubasta: " + activeBids.getId() +"\nFinal Price: "+activeBids.getFinalPrice(), Toast.LENGTH_SHORT).show();
                 }
 
                 return false;
@@ -264,7 +302,7 @@ public class ViewOnMapActivity extends AppCompatActivity implements OnMapReadyCa
                                             endPoint.setLatitude(Double.parseDouble(locationResponse.get(j).getLatitud()));
                                             endPoint.setLongitude(Double.parseDouble(locationResponse.get(j).getLogitud()));
 
-                                            double distance=startPoint.distanceTo(endPoint)/1000;// en km
+                                            double distance = startPoint.distanceTo(endPoint)/1000;// in km
 
                                             if((distance)<Double.parseDouble(editTextMetters.getText().toString())){
 
@@ -281,12 +319,12 @@ public class ViewOnMapActivity extends AppCompatActivity implements OnMapReadyCa
                                                                 .icon(BitmapDescriptorFactory.defaultMarker(Float.parseFloat(locationResponse.get(j).getString1()))));
                                                                 //.icon(BitmapDescriptorFactory.defaultMarker((locationResponse.get(j).getString1()==null)?Float.parseFloat("210.0F"):Float.parseFloat(locationResponse.get(j).getString1()))));
 
-                                                        // Si esta en rojo es xq inicio una subasta, entonces ahora lo busco por userName (solo puede tener una subasta iniciada)
+                                                        // Si esta en rojo es xq inició una subasta, entonces ahora lo busco por userName (solo puede tener una subasta iniciada)
                                                         if(!listActiveBids.isEmpty()){
                                                             for (ActiveBids bids : listActiveBids){
                                                                 if(bids.getUsername().equals(locationResponse.get(j).getUserName())){
                                                                     bids.setUsername(locationResponse.get(j).getUserName());
-                                                                    marker.setTag(bids);
+                                                                    marker.setTag(bids); // le
                                                                 }
                                                             }
                                                         }
@@ -317,7 +355,6 @@ public class ViewOnMapActivity extends AppCompatActivity implements OnMapReadyCa
                                                 }
                                             }
                                             else{
-
                                                 Toast.makeText(getApplicationContext(), "Not users nears", Toast.LENGTH_SHORT).show();
                                             }
                                         }
@@ -348,7 +385,7 @@ public class ViewOnMapActivity extends AppCompatActivity implements OnMapReadyCa
     @Override
     protected void onPause() {
         super.onPause();
-        handler.removeCallbacks(runnable); //stop handler when activity not visible super.onPause();
+        //handler.removeCallbacks(runnable); //stop handler when activity not visible super.onPause();
     }
 
     @Override
@@ -388,12 +425,22 @@ public class ViewOnMapActivity extends AppCompatActivity implements OnMapReadyCa
 
     public void sendBid10(View v){
 
-        int priceFinal = Integer.valueOf(bid.getPrice())+10;
+        int amount = 10, priceToBid ;
 
-        bid.setPrice(String.valueOf(priceFinal));
+        bidup = new Bidup();
+
+        bidup.setId(idSendBid);
+        bidup.setUsername(HomeActivity.username);
+
+        for(ActiveBids activeBids:listActiveBids){
+            if(activeBids.getId().equals(idSendBid)){
+                priceToBid = Integer.valueOf(activeBids.getFinalPrice()) + amount;
+                bidup.setPrice(String.valueOf(priceToBid));
+            }
+        }
 
         if(hubConnection.getConnectionState() == HubConnectionState.CONNECTED){
-            hubConnection.send("SendBid", bid);
+            hubConnection.send("SendBid", bidup);
             Toast.makeText(this, "You submitted a bid", Toast.LENGTH_SHORT).show();
         }
         else{
@@ -403,4 +450,31 @@ public class ViewOnMapActivity extends AppCompatActivity implements OnMapReadyCa
 
     }
 
+    public void parseTime(String dateTimeString){
+        String[] dateTimeSplit = dateTimeString.split(" ");
+
+        String[] date = dateTimeSplit[0].split("/");
+        int day = Integer.valueOf(date[0]);
+        int month = Integer.valueOf(date[1]);
+        int year = Integer.valueOf(date[2]);
+
+        String[] time = dateTimeSplit[1].split(":");
+        int hour = Integer.valueOf(time[0]);
+        int minute = Integer.valueOf(time[1]);
+        int second = Integer.valueOf(time[2]);
+
+        LocalDateTime l =LocalDateTime.of(year, month, day,hour,minute,second);
+
+        LocalDateTime now = LocalDateTime.now();
+
+        Duration duration = Duration.between(now, l);
+
+        int min = (int) (duration.getSeconds()/ 60);
+        int sec =  (int) (duration.getSeconds() % 60);
+
+        Log.e("Duration", ""+ min);
+        Log.e("Duration: " , ""+ sec);
+
+
+    }
 }

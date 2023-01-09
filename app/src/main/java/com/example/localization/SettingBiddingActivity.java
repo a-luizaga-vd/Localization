@@ -35,13 +35,13 @@ public class SettingBiddingActivity extends AppCompatActivity {
         et_product = findViewById(R.id.product);
         et_description = findViewById(R.id.description);
 
-        hubConnection = HubConnectionBuilder.create("http://35.239.225.98:443/hubs/bids")
-                .withHeader("Authorization", "Bearer " + token)
-                .build();
-
-//        hubConnection = HubConnectionBuilder.create("http://10.0.2.2:5004/hubs/bids")
-//                .withHeader("Authorization", "Bearer "+token)
+//        hubConnection = HubConnectionBuilder.create("http://35.239.225.98:443/hubs/bids")
+//                .withHeader("Authorization", "Bearer " + token)
 //                .build();
+
+        hubConnection = HubConnectionBuilder.create("http://10.0.2.2:5004/hubs/bids")
+                .withHeader("Authorization", "Bearer "+token)
+                .build();
 
         hubConnection.start();
         Toast.makeText(this, "Conexion exitosa", Toast.LENGTH_SHORT).show();
