@@ -1,5 +1,6 @@
 package com.example.localization
 
+import android.content.Intent
 import android.os.Bundle
 import android.os.SystemClock
 import android.util.Log
@@ -16,7 +17,7 @@ import com.microsoft.signalr.HubConnection
 import com.microsoft.signalr.HubConnectionBuilder
 
 class BiddingStatusActivity : AppCompatActivity(), OnChronometerTickListener {
-    var listDatos: ArrayList<Bid> = ArrayList<Bid>()
+    private var listDatos: ArrayList<Bid> = ArrayList()
     private lateinit var recycler: RecyclerView
 
     private lateinit var hubConnection: HubConnection
@@ -32,7 +33,7 @@ class BiddingStatusActivity : AppCompatActivity(), OnChronometerTickListener {
         recycler.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
 
-        val adapter : AdapterBid = AdapterBid(listDatos)
+        val adapter = AdapterBid(listDatos)
         recycler.adapter = adapter
 
 //        val bid1 = Bid("lean", "200", "otro")
@@ -119,10 +120,10 @@ class BiddingStatusActivity : AppCompatActivity(), OnChronometerTickListener {
                 "time reached", Toast.LENGTH_SHORT
             ).show()
             Log.v("TIMER", "Stopped")
-
+            val i = Intent(this, ViewOnMapActivity::class.java)
+            startActivity(i)
         }
     }
-
 
     private fun startCounter( time : String?) {
 
@@ -147,5 +148,8 @@ class BiddingStatusActivity : AppCompatActivity(), OnChronometerTickListener {
 //        chronometer.stop();
         Log.v("Cancel", "cancelado")
         //hubConnection.send("LeaveGroup")
+
+        val i = Intent(this, ViewOnMapActivity::class.java)
+        startActivity(i)
     }
 }
