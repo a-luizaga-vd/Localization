@@ -6,4 +6,51 @@
     android:name="com.google.android.gms.maps.SupportMapFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MapsActivity" />
+    tools:context=".MapsActivity">
+    <Button
+        android:layout_gravity="start|bottom"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:layout_width="wrap_content"
+        android:padding="10dp"
+        android:layout_marginStart="80dp"
+        android:layout_marginBottom="120dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:text="Pujar +5" />
+    <Button
+        android:layout_gravity="end|bottom"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:layout_width="wrap_content"
+        android:padding="10dp"
+        android:layout_marginEnd="70dp"
+        android:layout_marginBottom="120dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:text="Pujar +10" />
+    <Button
+        android:layout_gravity="end|bottom"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:layout_width="wrap_content"
+        android:padding="10dp"
+        android:layout_marginEnd="133dp"
+        android:layout_marginBottom="70dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:text="Abandonar" />
+    <Button
+        android:layout_gravity="end|bottom"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="30dp"
+        android:layout_width="wrap_content"
+        
+        android:padding="10dp"
+        android:layout_marginEnd="133dp"
+        android:layout_marginBottom="70dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:text="Abandonar" />
+</fragment>
+

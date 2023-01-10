@@ -11,4 +11,5 @@
     <string name="product">Product:</string>
     <string name="initial_bidding">Initial Bidding: $</string>
     <string name="last_bids">Last bids</string>
+    <string name="bid">Nombre: %s / Precio: </string>
 </resources>

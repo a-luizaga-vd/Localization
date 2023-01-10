@@ -2,6 +2,7 @@ package com.example.localization;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -15,6 +16,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.localization.bids.ActiveBids;
+//import com.example.localization.bids.Bidup;
 import com.example.localization.bids.Bidup;
 import com.example.localization.response.LocationResponse;
 import com.example.localization.services.LocationService;
@@ -65,8 +67,8 @@ public class ViewOnMapActivity extends AppCompatActivity implements OnMapReadyCa
     Button bt10Mas;
     Button bt25Mas;
     String idSendBid;
-    Bidup bidup;
 
+    Bidup bidup;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,13 +88,13 @@ public class ViewOnMapActivity extends AppCompatActivity implements OnMapReadyCa
         /** Subastas */
         token = HomeActivity.myToken;
 
-        /*hubConnection = HubConnectionBuilder.create("http://35.239.225.98:443/hubs/bids")
+        hubConnection = HubConnectionBuilder.create("http://35.239.225.98:443/hubs/bids")
                 .withHeader("Authorization", "Bearer " + token)
-                .build();*/
-
-        hubConnection = HubConnectionBuilder.create("http://10.0.2.2:5004/hubs/bids")
-                .withHeader("Authorization", "Bearer "+token)
                 .build();
+
+//        hubConnection = HubConnectionBuilder.create("http://10.0.2.2:5004/hubs/bids")
+//                .withHeader("Authorization", "Bearer "+token)
+//                .build();
 
         hubConnection.start();
         Toast.makeText(this, "Conexion exitosa", Toast.LENGTH_SHORT).show();

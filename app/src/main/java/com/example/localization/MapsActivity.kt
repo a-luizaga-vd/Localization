@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Color
 import android.location.Location
 import android.os.*
 import android.util.Log
@@ -28,7 +29,7 @@ import retrofit2.Response
 import java.io.IOException
 
 
-class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
+class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
     lateinit var mGoogleMap: GoogleMap
     var mapFrag: SupportMapFragment? = null
     lateinit var mLocationRequest: LocationRequest
@@ -39,26 +40,27 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         return listLocation
     }
 
-    //    lateinit var locationService : LocationService
-    var mLastLocation: Location? = null
-
+    var mLastLocation: LatLng? = null
+    private var mapCircle: Circle? = null
+    private var mapCircle2: Circle? = null
+    private var isInfoWindowShown = false
     private var mapMarkers: HashMap<String, Marker?> = HashMap()
-
     private var mFusedLocationClient: FusedLocationProviderClient? = null
 
     private var mLocationCallback: LocationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
-//            val locationList = locationResult.locations
-//            if (locationList.isNotEmpty()) {
-//                // Returns locations computed, ordered from oldest to newest.
-//                // The last location in the list is the newest
-//                val location = locationList.last()
-//                //esto mas que nada para ver info en el log
-//                Log.i(
-//                    "MapsActivity",
-//                    "Location: " + location.getLatitude() + " " + location.getLongitude()
-//                )
-//                mLastLocation = location
+            val locationList = locationResult.locations
+            if (locationList.isNotEmpty()) {
+                // Returns locations computed, ordered from oldest to newest.
+                // The last location in the list is the newest
+                val location = locationList.last()
+                //esto mas que nada para ver info en el log
+                Log.i(
+                    "MapsActivity",
+                    "Location: " + location.latitude + " " + location.longitude
+                )
+                mLastLocation = LatLng(location.latitude, location.longitude)
+            }
 
             getLocations()
 
@@ -124,66 +126,59 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mLocationRequest.fastestInterval = 1000
         mLocationRequest.priority = LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ContextCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-            ) {
-                //ya tiene permisos
-                mFusedLocationClient?.requestLocationUpdates(
-                    mLocationRequest,
-                    mLocationCallback,
-                    Looper.myLooper()
-                )
-                mGoogleMap.isMyLocationEnabled = false
-            } else {
-                //pedir permisos de locacion
-                checkLocationPermission()
-            }
-        } else {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            //ya tiene permisos
             mFusedLocationClient?.requestLocationUpdates(
                 mLocationRequest,
                 mLocationCallback,
                 Looper.myLooper()
             )
             mGoogleMap.isMyLocationEnabled = false
-
-//            val onMarkerClickedListener =
-//                OnMarkerClickListener { marker ->
-//                    if (marker.isInfoWindowShown) {
-//                        marker.hideInfoWindow()
-//                    } else {
-//                        marker.showInfoWindow()
-//                    }
-//                    true
-//                }
-
-//            mGoogleMap.setOnMarkerDragListener(object : OnMarkerDragListener {
-//                override fun onMarkerDragStart(arg0: Marker) {
-//                    // TODO Auto-generated method stub
-//                    Log.d(
-//                        "System out",
-//                        "onMarkerDragStart..." + arg0.position.latitude + "..." + arg0.position.longitude
-//                    )
-//                }
-//
-//                override fun onMarkerDragEnd(arg0: Marker) {
-//                    // TODO Auto-generated method stub
-//                    Log.d(
-//                        "System out",
-//                        "onMarkerDragEnd..." + arg0.position.latitude + "..." + arg0.position.longitude
-//                    )
-//                }
-//
-//                override fun onMarkerDrag(arg0: Marker) {
-//                    // TODO Auto-generated method stub
-//                    Log.i("System out", "onMarkerDrag...")
-//                }
-//            })
-
-//            mGoogleMap.setOnMarkerClickListener(onMarkerClickedListener);
+            Handler(Looper.getMainLooper()).postDelayed({
+                if( mLastLocation != null )
+                    mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mLastLocation!!, 13.5F))
+            }, 3000)
+        } else {
+            //pedir permisos de locacion
+            checkLocationPermission()
         }
+        mGoogleMap.isMyLocationEnabled = false
+
+        Handler(Looper.getMainLooper()).postDelayed({
+            if( mLastLocation != null )
+                mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mLastLocation!!, 13.5F))
+        }, 3000)
+
+//        val latLng = LatLng(-34.6814086160595, -58.55807614030567)
+//
+//        val markerOption =
+//            MarkerOptions()
+//                .position(latLng)
+//                .title("hola")
+//                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED))
+//        mGoogleMap.addMarker(markerOption)
+
+        mGoogleMap.setOnMarkerClickListener(this);
+
+        mGoogleMap.setOnMapClickListener(object :GoogleMap.OnMapClickListener {
+            override fun onMapClick(latlng :LatLng) {
+                if (isInfoWindowShown) {
+//                    marker.hideInfoWindow()
+                    mapCircle?.remove();
+                    mapCircle2?.remove();
+//                mapCircle?.isVisible = false
+
+                    Log.v("MARKERC", "********CLICK TRUE************")
+                    Log.v("MARKERC", isInfoWindowShown.toString())
+                    isInfoWindowShown = false
+                }
+            }
+        })
+
 
     }
 
@@ -245,7 +240,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         )
     }
 
-    private fun placeMarker(location: LatLng, name: String, color : String) {
+    private fun placeMarker(location: LatLng, name: String, color: String) {
 //        val markerOption = MarkerOptions().position(location)
 
         fun bitmapDescriptorFromVector(context: Context, vectorResId: Int): BitmapDescriptor? {
@@ -260,7 +255,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         Log.v("MARKER", name)
 
-        if (!mapMarkers.containsKey(name)){
+        if (!mapMarkers.containsKey(name)) {
             Log.v("MARKER2", mapMarkers.containsKey(name).toString())
             Log.v("MARKER2", "ACA")
             val markerOption =
@@ -276,8 +271,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
 
             val mCurrLocationMarker = mGoogleMap.addMarker(markerOption)
+
             mCurrLocationMarker?.isVisible = true;
-            mCurrLocationMarker?.showInfoWindow();
+//            mCurrLocationMarker?.showInfoWindow();
             if (mCurrLocationMarker != null) {
                 mapMarkers[name] = mCurrLocationMarker
                 Log.v("MARKER2", "agrega")
@@ -291,9 +287,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             Log.v("MARKER2", mapMarkers.containsKey(name).toString())
         }
 
-        if( mapMarkers.containsKey(name) && color == "0.0F")
+        if (mapMarkers.containsKey(name) && color == "0.0F")
             mapMarkers[name]?.setIcon(bitmapDescriptorFromVector(this, R.drawable.ic_car_red))
-        else if(mapMarkers.containsKey(name))
+        else if (mapMarkers.containsKey(name))
             mapMarkers[name]?.setIcon(bitmapDescriptorFromVector(this, R.drawable.ic_car_blue))
 
 //        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 18.0F))
@@ -363,7 +359,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                             Looper.myLooper()
                         )
                         mGoogleMap.isMyLocationEnabled = true
-                    }
+                        Handler(Looper.getMainLooper()).postDelayed({
+                        if( mLastLocation != null )
+                            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mLastLocation!!, 13.5F))
+                            }, 3000)
+                        }
 
                 } else {
 
@@ -377,5 +377,51 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     companion object {
         const val MY_PERMISSIONS_REQUEST_LOCATION = 99
+    }
+
+    override fun onMarkerClick(marker: Marker): Boolean {
+//        mGoogleMap.setOnCameraIdleListener {
+//            val midLatLng: LatLng = mGoogleMap.cameraPosition.target
+
+//        Handler(Looper.getMainLooper()).postDelayed({
+            //Do something after 100ms
+            if (isInfoWindowShown) {
+                marker.hideInfoWindow()
+                mapCircle?.remove();
+                mapCircle2?.remove();
+//                mapCircle?.isVisible = false
+
+                Log.v("MARKERC", "********CLICK TRUE************")
+                Log.v("MARKERC", isInfoWindowShown.toString())
+                isInfoWindowShown = false
+            } else {
+                Log.v("MARKERC", "********CLICK False************")
+                Log.v("MARKERC", isInfoWindowShown.toString())
+                isInfoWindowShown = true
+                marker.showInfoWindow()
+                mapCircle = mGoogleMap.addCircle(
+                    CircleOptions()
+                        .center(marker.position)
+                        .radius(2000.0)
+                        .strokeWidth(5f)
+                        .strokeColor(Color.GREEN)
+//                        .fillColor(Color.rgb(79,121,66))
+                )
+                mapCircle2 = mGoogleMap.addCircle(
+                    CircleOptions()
+                        .center(marker.position)
+                        .radius(3000.0)
+                        .strokeWidth(5f)
+                        .strokeColor(Color.YELLOW)
+//                        .fillColor(Color.rgb(79,121,66))
+                )
+                mapCircle?.isVisible = true
+            }
+//        }
+            Log.v("MARKERC", "********CLICK************")
+
+
+//        Toast.makeText(this, "Clicked location is ", Toast.LENGTH_SHORT).show()
+        return false
     }
 }
