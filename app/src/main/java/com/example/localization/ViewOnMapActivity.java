@@ -2,13 +2,13 @@ package com.example.localization;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -16,7 +16,6 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.localization.bids.ActiveBids;
-//import com.example.localization.bids.Bidup;
 import com.example.localization.bids.Bidup;
 import com.example.localization.response.LocationResponse;
 import com.example.localization.services.LocationService;
@@ -67,8 +66,8 @@ public class ViewOnMapActivity extends AppCompatActivity implements OnMapReadyCa
     Button bt10Mas;
     Button bt25Mas;
     String idSendBid;
-
     Bidup bidup;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,20 +87,31 @@ public class ViewOnMapActivity extends AppCompatActivity implements OnMapReadyCa
         /** Subastas */
         token = HomeActivity.myToken;
 
-        hubConnection = HubConnectionBuilder.create("http://35.239.225.98:443/hubs/bids")
+        /*hubConnection = HubConnectionBuilder.create("http://35.239.225.98:443/hubs/bids")
                 .withHeader("Authorization", "Bearer " + token)
-                .build();
+                .build();*/
 
-//        hubConnection = HubConnectionBuilder.create("http://10.0.2.2:5004/hubs/bids")
-//                .withHeader("Authorization", "Bearer "+token)
-//                .build();
+        hubConnection = HubConnectionBuilder.create("http://10.0.2.2:5004/hubs/bids")
+                .withHeader("Authorization", "Bearer "+token)
+                .build();
 
         hubConnection.start();
         Toast.makeText(this, "Conexion exitosa", Toast.LENGTH_SHORT).show();
 
-        if(hubConnection.getConnectionState() == HubConnectionState.CONNECTED){
-            hubConnection.send("JoinGroup");
-        }
+//        if(hubConnection.getConnectionState() == HubConnectionState.CONNECTED){
+//            hubConnection.send("JoinGroup");
+//        }
+
+        /** Join without button **/
+        final Handler handler = new Handler(Looper.getMainLooper());
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if(hubConnection.getConnectionState() == HubConnectionState.CONNECTED){
+                    hubConnection.send("JoinGroup");
+                 }
+            }
+        }, 500);
 
         hubConnection.on("NewUser", (msg) -> {
             Gson g = new Gson();
@@ -122,7 +132,7 @@ public class ViewOnMapActivity extends AppCompatActivity implements OnMapReadyCa
             String description = messageSplit[3].substring(14);
             String owner = messageSplit[4].substring(8);
 
-            parseTime(time);
+            //parseTime(time);
             //LocalDateTime myDateObj = LocalDateTime.of();
 
             ActiveBids activeBids = new ActiveBids();
@@ -155,8 +165,8 @@ public class ViewOnMapActivity extends AppCompatActivity implements OnMapReadyCa
                     if(activeBids.getId().equals(id)){
                         activeBids.setFinalPrice(price);
 
-                        hashMapRed.get(activeBids.getUsername()).setTag(null);
-                        hashMapRed.get(activeBids.getUsername()).setTag(activeBids);
+//                        hashMapRed.get(activeBids.getUsername()).setTag(null);
+//                        hashMapRed.get(activeBids.getUsername()).setTag(activeBids);
                     }
                 }
             }
@@ -221,11 +231,23 @@ public class ViewOnMapActivity extends AppCompatActivity implements OnMapReadyCa
                     // declaro un IdSubasta y cuando oprimo sobre los marcadores le seteo el id que tiene el marker al idSubasta
                     // entonces los botones ya le pujan a ese iD y fue
 
-                    activeBids = (ActiveBids) marker.getTag();
+//                    activeBids = (ActiveBids) marker.getTag();
+//
+//                    idSendBid = activeBids.getId();
+//
+//                    Toast.makeText(ViewOnMapActivity.this, "IdSubasta: " + activeBids.getId() +"\nFinal Price: "+activeBids.getFinalPrice(), Toast.LENGTH_SHORT).show();
 
-                    idSendBid = activeBids.getId();
+                    String idBidding = (String) marker.getTag();
+                    idSendBid = idBidding;
 
-                    Toast.makeText(ViewOnMapActivity.this, "IdSubasta: " + activeBids.getId() +"\nFinal Price: "+activeBids.getFinalPrice(), Toast.LENGTH_SHORT).show();
+                    ActiveBids actBid = new ActiveBids();
+
+                    for(ActiveBids activeBids2:listActiveBids){
+                        if(activeBids2.getId().equals(idBidding)){
+                            actBid = activeBids2;
+                        }
+                    }
+                    Toast.makeText(ViewOnMapActivity.this, "IdSubasta: " + actBid.getId() +"\nFinal Price: "+actBid.getFinalPrice(), Toast.LENGTH_SHORT).show();
                 }
 
                 return false;
@@ -319,14 +341,17 @@ public class ViewOnMapActivity extends AppCompatActivity implements OnMapReadyCa
                                                                 .position(loc)
                                                                 .title(locationResponse.get(j).getUserName())
                                                                 .icon(BitmapDescriptorFactory.defaultMarker(Float.parseFloat(locationResponse.get(j).getString1()))));
-                                                                //.icon(BitmapDescriptorFactory.defaultMarker((locationResponse.get(j).getString1()==null)?Float.parseFloat("210.0F"):Float.parseFloat(locationResponse.get(j).getString1()))));
+                                                        //.icon(BitmapDescriptorFactory.defaultMarker((locationResponse.get(j).getString1()==null)?Float.parseFloat("210.0F"):Float.parseFloat(locationResponse.get(j).getString1()))));
 
                                                         // Si esta en rojo es xq inició una subasta, entonces ahora lo busco por userName (solo puede tener una subasta iniciada)
                                                         if(!listActiveBids.isEmpty()){
                                                             for (ActiveBids bids : listActiveBids){
                                                                 if(bids.getUsername().equals(locationResponse.get(j).getUserName())){
-                                                                    bids.setUsername(locationResponse.get(j).getUserName());
-                                                                    marker.setTag(bids); // le
+//                                                                    bids.setUsername(locationResponse.get(j).getUserName());
+//                                                                    marker.setTag(bids);
+                                                                    String idBidding2 = bids.getId();
+                                                                    marker.setTag(idBidding2);
+
                                                                 }
                                                             }
                                                         }
@@ -350,7 +375,7 @@ public class ViewOnMapActivity extends AppCompatActivity implements OnMapReadyCa
                                                             .position(loc)
                                                             .title(locationResponse.get(j).getUserName())
                                                             .icon(BitmapDescriptorFactory.defaultMarker(Float.parseFloat(locationResponse.get(j).getString1()))));
-                                                            //.icon(BitmapDescriptorFactory.defaultMarker((locationResponse.get(j).getString1()!=null)?Float.parseFloat("210.0F"):Float.parseFloat(locationResponse.get(j).getString1()))));
+                                                    //.icon(BitmapDescriptorFactory.defaultMarker((locationResponse.get(j).getString1()!=null)?Float.parseFloat("210.0F"):Float.parseFloat(locationResponse.get(j).getString1()))));
 
                                                     //marker.setTag(color);
                                                     newMarkers.add(marker);
@@ -382,6 +407,20 @@ public class ViewOnMapActivity extends AppCompatActivity implements OnMapReadyCa
         }
 
 
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+//
+//        if(hubConnection.getConnectionState() == HubConnectionState.DISCONNECTED){
+//            hubConnection.start();
+//            while(hubConnection.getConnectionState() == HubConnectionState.DISCONNECTED){
+//                hubConnection.start();
+//            }
+//            hubConnection.send("JoinGroup");
+//        }
     }
 
     @Override
@@ -426,7 +465,7 @@ public class ViewOnMapActivity extends AppCompatActivity implements OnMapReadyCa
     }
 
     public void sendBid10(View v){
-
+        /**
         int amount = 10, priceToBid ;
 
         bidup = new Bidup();
@@ -446,9 +485,70 @@ public class ViewOnMapActivity extends AppCompatActivity implements OnMapReadyCa
             Toast.makeText(this, "You submitted a bid", Toast.LENGTH_SHORT).show();
         }
         else{
-            Toast.makeText(this, "You are not connected", Toast.LENGTH_SHORT).show();
-        }
+            hubConnection.start();
+            if(hubConnection.getConnectionState() == HubConnectionState.CONNECTED){
+                hubConnection.send("JoinGroup");
+                btJoinLeaveGroup.setText("leave");
+                hubConnection.send("SendBid", bidup);
+            }
+            else{
+                Toast.makeText(this, "You are not connected", Toast.LENGTH_SHORT).show();
+            }
 
+            //Toast.makeText(this, "You are not connected", Toast.LENGTH_SHORT).show();
+        }
+         **/
+
+        if(hubConnection.getConnectionState() == HubConnectionState.CONNECTED){
+            int amount = 10, priceToBid ;
+            bidup = new Bidup();
+            bidup.setId(idSendBid);
+            bidup.setUsername(HomeActivity.username);
+
+            for(ActiveBids activeBids:listActiveBids){
+                if(activeBids.getId().equals(idSendBid)){
+                    priceToBid = Integer.valueOf(activeBids.getFinalPrice()) + amount;
+                    bidup.setPrice(String.valueOf(priceToBid));
+                }
+            }
+            hubConnection.send("SendBid", bidup);
+        }
+        else{
+            hubConnection.start();
+
+            /** Join without button **/
+            final Handler handler = new Handler(Looper.getMainLooper());
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if(hubConnection.getConnectionState() == HubConnectionState.CONNECTED){
+                        hubConnection.send("JoinGroup");
+                    }
+                }
+            }, 500);
+
+            if(hubConnection.getConnectionState() == HubConnectionState.CONNECTED){
+                hubConnection.send("JoinGroup");
+
+                int amount = 10, priceToBid ;
+                bidup = new Bidup();
+                bidup.setId(idSendBid);
+                bidup.setUsername(HomeActivity.username);
+
+                for(ActiveBids activeBids:listActiveBids){
+                    if(activeBids.getId().equals(idSendBid)){
+                        priceToBid = Integer.valueOf(activeBids.getFinalPrice()) + amount;
+                        bidup.setPrice(String.valueOf(priceToBid));
+                    }
+                }
+                btJoinLeaveGroup.setText("leave");
+                hubConnection.send("SendBid", bidup);
+
+            }
+            else{
+                Toast.makeText(this, "You are not connected", Toast.LENGTH_SHORT).show();
+            }
+        }
 
     }
 
